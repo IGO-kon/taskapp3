@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}検索 - 在庫管理アプリ{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <h2>商品検索</h2>
+    
+    <form method="GET" action="{{ url_for('search') }}" class="search-form">
+        <div class="search-box">
+            <input type="text" name="q" value="{{ query }}" placeholder="商品名、説明、カテゴリで検索...">
+            <button type="submit" class="btn btn-primary">🔍 検索</button>
+        </div>
+    </form>
+
+    {% if query %}
+        <p class="search-results-info">「{{ query }}」の検索結果: {{ items|length }}件</p>
+        
+        {% if items %}
+        <div class="table-container">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>商品名</th>
+                        <th>説明</th>
+                        <th>カテゴリ</th>
+                        <th>数量</th>
+                        <th>価格</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.description[:50] }}{% if item.description|length > 50 %}...{% endif %}</td>
+                        <td>{{ item.category or '-' }}</td>
+                        <td>
+                            <span class="quantity-badge {% if item.quantity < 10 %}low{% elif item.quantity < 50 %}medium{% else %}high{% endif %}">
+                                {{ item.quantity }}
+                            </span>
+                        </td>
+                        <td>¥{{ "{:,.0f}".format(item.price) }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('edit_item', id=item.id) }}" class="btn btn-small btn-edit">編集</a>
+                            <a href="{{ url_for('delete_item', id=item.id) }}" 
+                               class="btn btn-small btn-delete"
+                               onclick="return confirm('本当に削除しますか?')">削除</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>検索結果が見つかりませんでした。</p>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
